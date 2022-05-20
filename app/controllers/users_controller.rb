@@ -17,18 +17,7 @@ class UsersController < ApplicationController
     verification = Verification.find_by(phone_number: params["phone_number"])
     if verification.present?
       if verification.is_valid?(params["otp_code"])
-
       user = User.find_or_create_by(phone_number: params["phone_number"])
-      debugger
-      if user.kyc.pan_verification_response == "true" &&  user.kyc.adhar_verification_response == "true" &&  user.kyc.photo_verification_response == "true"
-        puts "KYC verified successfully"  
-      elsif user.kyc.pan_verification_response != "true"
-        puts "PAN verification failed"
-      elsif user.kyc.adhar_verification_response != "true"
-        puts "Aadhar verification failed"
-      elsif user.kyc.photo_verification_response != "true"
-        puts "Photo verification failed"
-      end
       token = JsonWebToken.encode(user_id: user.id)
       user.api_token ? user.api_token.save_token(token) : user.build_api_token.save_token(token)
       render json: {status: 'success',data:{ user: user, message: "Phone number Verified"},auth_token: token}
